@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%;" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="./tournaentPlayer.js"></script>
+    <style>
+        .btn-info,
+        .bg-info {
+            background-color: #415aa4 !important;
+            border: #415aa4 !important;
+        }
+
+    </style>
+</head>
+
+<body style="height: 100%;font-family: fangsong;" class="bg-img" ng-app="myApp" ng-controller="myCtrl"
+    ng-init="onload();">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-info"
+        style="background-image: linear-gradient(to right,#304174, #070707); background-color: #000000;">
+        <img ng-if="userData.userType == 'TEAM'" src="{{userData.logo}}" style="height: 43px;">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
+            aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav mr-auto">
+                <li ng-if="userData.userType == 'TEAM'" class="nav-item menuCls pl-3" id="tableReserveTabId"
+                    menuType="MENU" style="padding-top: 7px;">
+                    <h5 class="text-black">{{userData.teamName}}</h5>
+                </li>
+                <li class="nav-item active menuCls" id="playerDetailsTabId" menuType="PLAYER_DETAILS">
+                    <a class="nav-link" href="#"
+                        ng-click="switchMenu('PLAYER_DETAILS','playerDetailsTabId')">{{userData.userType == 'TEAM' ?
+                        'Player
+                        Details' : 'Proposal Details'}}</a>
+                </li>
+                <li class="nav-item menuCls" menuType="TEAM_MEMBER" id="teamMemberTabId">
+                    <a class="nav-link" href="#" ng-click="switchMenu('TEAM_MEMBER','teamMemberTabId')">Team
+                        Member</a>
+                </li>
+            </ul>
+            <span class="navbar-text" style="cursor: pointer;">
+                <i class="fa fa-sign-out" style="font-size: 20px;" ng-click="logout()">Logout</i>
+            </span>
+        </div>
+    </nav>
+    <div class="col-md-12 p-0" id="viewPlayersTableDivId">
+        <div class="col-md-12 p-0">
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">First Name</th>
+                        <th scope="col">Last Name</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Contact No.</th>
+                        <th scope="col">Base Price</th>
+                        <th scope="col">Bidding Price</th>
+                        <th scope="col">Bid</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="data in playerDetailsData" ng-hide="data.isAccepted && userData.userType == 'TEAM'">
+                        <td scope="col" class="text-black">{{data.fNameId}}</td>
+                        <td scope="col" class="text-black">{{data.lNameId}}</td>
+                        <td scope="col" class="text-black">{{data.userEmailId}}</td>
+                        <td scope="col" class="text-black">{{data.contactId}}</td>
+                        <td scope="col" class="text-black">{{data.basePriceId}}</td>
+                        <td scope="col" class="text-black">{{data.biddingPrice}}</td>
+                        <td scope="col" class="text-black">
+                            <button ng-show="userData.userType == 'TEAM'" type="button"
+                                class="border btn-small btn-info rounded" ng-click="getPlayerData(data)"
+                                data-toggle="modal" data-target="#biddingModelId">Bid</button>
+                            <button ng-show="userData.userType == 'PLAYER'" type="button"
+                                class="border btn-small btn-info rounded" data-toggle="modal"
+                                data-target="#biddingModelId" ng-click="getPlayerData(data)">View
+                                Details</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- process to pay -->
+            <div class="modal fade" id="biddingModelId">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <!-- Modal Header -->
+                        <div class="modal-header bg-info">
+                            <h4 class="modal-title text-white">{{userData.userType == 'PLAYER' ? 'View Details' :
+                                'Bid'}}</h4>
+                            <button type="button" class="close" data-dismiss="modal">×</button>
+                        </div>
+                        <!-- Modal body -->
+                        <div class="modal-body">
+                            <form ng-show="userData.userType == 'TEAM'">
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <label for="ammountId">Bidding Price</label>
+                                        <input type="text" class="form-control" id="ammountId" value="" readonly>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="paymentModeId">Bid</label>
+                                        <input type="text" class="form-control" id="bidAmmountId" value="">
+                                    </div>
+                                </div>
+                            </form>
+                            <table ng-if="userData.userType == 'PLAYER'">
+                                <tr>
+                                    <th>Team Name</th>
+                                    <td>{{teamDetails.userDetails.teamName}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Bidding Amount</th>
+                                    <td>{{teamDetails.biddingPrice}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="reset" class="border btn btn-light" data-dismiss="modal">Close</button>
+                            <button ng-if="userData.userType == 'PLAYER'" type="button" class="border btn btn-info"
+                                ng-click="addTeam()" ng-disabled="userData.isAccepted">Accept</button>
+                            <button ng-if="userData.userType == 'TEAM'" type="button" class="border btn btn-info"
+                                ng-click="updateBid()">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Team Member -->
+    <div class="col-md-12 p-0" id="teamMemberDivId">
+        <div class="row">
+            <div class="col-sm-4 mb-3" ng-repeat="data in teamDetailsData">
+                <div class="card m-2">
+                    <div class="card-body">
+                        <img src="{{data.teamDetails.logo}}">
+                        <table>
+                            <tr>
+                                <th>Team Name</th>
+                                <td>{{data.teamDetails.teamName}}</td>
+                            </tr>
+                            <tr>
+                                <th>First Name</th>
+                                <td>{{data.playerDetails.fNameId}}</td>
+                            </tr>
+                            <tr>
+                                <th>Last Name</th>
+                                <td>{{data.playerDetails.lNameId}}</td>
+                            </tr>
+                            <tr>
+                                <th>Gender</th>
+                                <td>{{data.playerDetails.gender}}</td>
+                            </tr>
+                            <tr>
+                                <th>Contact</th>
+                                <td>{{data.playerDetails.contactId}}</td>
+                            </tr>
+                            <tr>
+                                <th>Address</th>
+                                <td>{{data.playerDetails.locationId}}</td>
+                            </tr>
+                            <tr>
+                                <th>Height</th>
+                                <td>{{data.playerDetails.heightId}}</td>
+                            </tr>
+                            <tr>
+                                <th>Weight</th>
+                                <td>{{data.playerDetails.weightId}}</td>
+                            </tr>
+                            <tr>
+                                <th>Running Speed</th>
+                                <td>{{data.playerDetails.avgRunningSpeedId}}</td>
+                            </tr>
+                            <tr>
+                                <th>Achivment</th>
+                                <td>{{data.playerDetails.achivmentId}}</td>
+                            </tr>
+                            <tr>
+                                <th>Blood group</th>
+                                <td>{{data.playerDetails.bloodGroupId}}</td>
+                            </tr>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
